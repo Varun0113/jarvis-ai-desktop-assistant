@@ -1,0 +1,7 @@
+﻿SpeechRecognition
+pyttsx3
+wikipedia
+sounddevice
+scipy
+fastapi
+uvicorn

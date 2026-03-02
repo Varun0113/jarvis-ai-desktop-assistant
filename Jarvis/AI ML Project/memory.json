@@ -1,0 +1,75 @@
+{
+    "user_profile": {
+        "name": "Mayuri"
+    },
+    "facts": {},
+    "preferences": {
+        "tone": "friendly",
+        "language_mode": "hinglish"
+    },
+    "personality": {
+        "sass_level": 0.55,
+        "traits": [
+            "helpful",
+            "witty",
+            "loyal"
+        ]
+    },
+    "session": {
+        "last_topic": "",
+        "last_interaction_date": "2026-03-02",
+        "last_greeting_date": "",
+        "last_mood": "positive",
+        "recent_topics": [
+            "kya baat hai",
+            "file project",
+            "project"
+        ]
+    },
+    "tasks": [],
+    "macros": {
+        "work mode": [
+            "open chrome",
+            "open notepad",
+            "show tasks",
+            "daily briefing"
+        ],
+        "focus mode": [
+            "mute volume",
+            "show tasks"
+        ]
+    },
+    "people": {},
+    "contacts": {},
+    "projects": {},
+    "notes": [],
+    "analytics": {
+        "total_commands": 58,
+        "commands_by_day": {
+            "2026-03-02": 58
+        },
+        "intent_counts": {
+            "sleep_wake": 21,
+            "general": 7,
+            "search": 4,
+            "file": 9,
+            "memory": 3,
+            "system": 1,
+            "calc": 2,
+            "message": 11
+        },
+        "reply_tags": {
+            "wake": 11,
+            "fallback": 4,
+            "search": 13,
+            "file": 8,
+            "memory": 3,
+            "sleep": 8,
+            "system": 1,
+            "calc": 2,
+            "message": 5,
+            "emotion": 1
+        }
+    },
+    "conversation_history": []
+}

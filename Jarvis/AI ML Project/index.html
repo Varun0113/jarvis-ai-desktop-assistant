@@ -1,0 +1,1817 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>JARVIS AI Assistant - Enterprise Control Center</title>
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+            color: #c9d1d9;
+            overflow: hidden;
+        }
+
+        /* ==================== Animated Background ==================== */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.02;
+        }
+
+        .grid-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, rgba(100, 200, 255, 0.05) 25%, rgba(100, 200, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(100, 200, 255, 0.05) 75%, rgba(100, 200, 255, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(100, 200, 255, 0.05) 25%, rgba(100, 200, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(100, 200, 255, 0.05) 75%, rgba(100, 200, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 100px 100px;
+        }
+
+        /* ==================== Main Layout ==================== */
+        .app-container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ==================== Sidebar Navigation ==================== */
+        .sidebar {
+            width: 72px;
+            background: rgba(13, 17, 23, 0.9);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(100, 200, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+            gap: 28px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(100, 200, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .sidebar-logo {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.15), rgba(88, 166, 255, 0.15));
+            border: 1px solid rgba(100, 200, 255, 0.25);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            font-size: 18px;
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-logo:hover {
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.25), rgba(88, 166, 255, 0.25));
+            border-color: rgba(100, 200, 255, 0.4);
+            box-shadow: 0 0 20px rgba(100, 200, 255, 0.15);
+        }
+
+        .sidebar-divider {
+            width: 32px;
+            height: 1px;
+            background: rgba(100, 200, 255, 0.1);
+        }
+
+        .nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            color: #8b949e;
+            border: 1px solid transparent;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(100, 200, 255, 0.08);
+            color: #58a6ff;
+            border-color: rgba(100, 200, 255, 0.15);
+        }
+
+        .nav-item.active {
+            background: rgba(100, 200, 255, 0.12);
+            border-color: rgba(100, 200, 255, 0.3);
+            color: #79c0ff;
+            box-shadow: inset 0 0 12px rgba(100, 200, 255, 0.1), 0 0 12px rgba(100, 200, 255, 0.15);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            width: 3px;
+            height: 24px;
+            background: linear-gradient(to bottom, rgba(100, 200, 255, 0), #79c0ff, rgba(100, 200, 255, 0));
+            border-radius: 3px;
+        }
+
+        /* ==================== Main Content ==================== */
+        .main-workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(13, 17, 23, 0.3);
+            overflow: hidden;
+        }
+
+        /* ==================== Header ==================== */
+        .header {
+            padding: 16px 32px;
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(100, 200, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f0f6fc;
+            letter-spacing: -0.3px;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            color: #8b949e;
+            font-weight: 400;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(100, 200, 255, 0.08);
+            border: 1px solid rgba(100, 200, 255, 0.2);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #79c0ff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3fb950;
+            box-shadow: 0 0 6px rgba(63, 185, 80, 0.4);
+            animation: pulse-soft 2.5s ease-in-out infinite;
+        }
+
+        .status-dot.listening {
+            background: #79c0ff;
+            box-shadow: 0 0 10px rgba(121, 192, 255, 0.5);
+            animation: pulse-intense 0.8s ease-in-out infinite;
+        }
+
+        .status-dot.responding {
+            background: #d29922;
+            box-shadow: 0 0 8px rgba(210, 153, 34, 0.4);
+            animation: pulse-soft 1.5s ease-in-out infinite;
+        }
+
+        .status-dot.idle {
+            background: #6e7681;
+            box-shadow: none;
+            animation: none;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        @keyframes pulse-intense {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        .mode-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .mode-btn {
+            padding: 6px 12px;
+            background: rgba(100, 200, 255, 0.08);
+            border: 1px solid rgba(100, 200, 255, 0.15);
+            border-radius: 4px;
+            color: #8b949e;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .mode-btn:hover {
+            background: rgba(100, 200, 255, 0.12);
+            border-color: rgba(100, 200, 255, 0.25);
+            color: #79c0ff;
+        }
+
+        .mode-btn.active {
+            background: rgba(100, 200, 255, 0.18);
+            border-color: rgba(100, 200, 255, 0.35);
+            color: #79c0ff;
+            box-shadow: 0 0 12px rgba(100, 200, 255, 0.1);
+        }
+
+        /* ==================== Content Area ==================== */
+        .content-area {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 1px;
+        }
+
+        /* ==================== Center Panel ==================== */
+        .center-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(13, 17, 23, 0.2);
+            border-right: 1px solid rgba(100, 200, 255, 0.08);
+            overflow: hidden;
+        }
+
+        /* ==================== Waveform Visualizer ==================== */
+        .waveform-zone {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            border-bottom: 1px solid rgba(100, 200, 255, 0.08);
+            flex-shrink: 0;
+        }
+
+        .waveform-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .waveform-ring {
+            position: absolute;
+            border-radius: 50%;
+            background: none;
+            border: 1px solid transparent;
+        }
+
+        .waveform-ring::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.2) 0%, transparent 70%);
+        }
+
+        .waveform-ring:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            animation: waveform-expand 2s ease-out infinite;
+        }
+
+        .waveform-ring:nth-child(2) {
+            width: 140px;
+            height: 140px;
+            animation: waveform-expand 2s ease-out 0.4s infinite;
+        }
+
+        .waveform-ring:nth-child(3) {
+            width: 180px;
+            height: 180px;
+            animation: waveform-expand 2s ease-out 0.8s infinite;
+        }
+
+        @keyframes waveform-expand {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.2);
+            }
+        }
+
+        .waveform-center {
+            position: relative;
+            z-index: 10;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.25), rgba(100, 200, 255, 0.15));
+            border: 1px solid rgba(100, 200, 255, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: inset 0 0 16px rgba(100, 200, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.15);
+        }
+
+        .waveform-hidden {
+            display: none;
+        }
+
+        .waveform-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ==================== Conversation Area ==================== */
+        .conversation-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 32px;
+            overflow-y: auto;
+            gap: 16px;
+        }
+
+        .conversation-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .conversation-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .conversation-area::-webkit-scrollbar-thumb {
+            background: rgba(100, 200, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .conversation-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 200, 255, 0.2);
+        }
+
+        .message-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            animation: message-fade-in 0.4s ease-out;
+        }
+
+        @keyframes message-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 70%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            max-width: 70%;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+            background: rgba(100, 200, 255, 0.1);
+            border: 1px solid rgba(100, 200, 255, 0.2);
+            color: #79c0ff;
+        }
+
+        .message.user .message-avatar {
+            background: rgba(79, 161, 246, 0.1);
+            border-color: rgba(79, 161, 246, 0.2);
+            color: #4fa1f6;
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #6e7681;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 200, 255, 0.12);
+            background: rgba(100, 200, 255, 0.06);
+            color: #c9d1d9;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: rgba(79, 161, 246, 0.12);
+            border-color: rgba(79, 161, 246, 0.2);
+            color: #f0f6fc;
+        }
+
+        /* ==================== Input Area ==================== */
+        .input-zone {
+            padding: 20px 32px;
+            border-top: 1px solid rgba(100, 200, 255, 0.08);
+            background: rgba(22, 27, 34, 0.4);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        .voice-input-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            background: rgba(100, 200, 255, 0.1);
+            border: 1px solid rgba(100, 200, 255, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #79c0ff;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .voice-input-btn:hover {
+            background: rgba(100, 200, 255, 0.15);
+            border-color: rgba(100, 200, 255, 0.3);
+            box-shadow: 0 0 12px rgba(100, 200, 255, 0.1);
+        }
+
+        .voice-input-btn.active {
+            background: rgba(100, 200, 255, 0.25);
+            border-color: rgba(100, 200, 255, 0.4);
+            box-shadow: 0 0 20px rgba(100, 200, 255, 0.25);
+            animation: voice-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes voice-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .text-input {
+            flex: 1;
+            background: rgba(30, 35, 46, 0.6);
+            border: 1px solid rgba(100, 200, 255, 0.15);
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: #c9d1d9;
+            font-family: inherit;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .text-input::placeholder {
+            color: #6e7681;
+        }
+
+        .text-input:focus {
+            background: rgba(30, 35, 46, 0.8);
+            border-color: rgba(100, 200, 255, 0.3);
+            box-shadow: 0 0 12px rgba(100, 200, 255, 0.1);
+        }
+
+        .text-input.speech-only-disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.25), rgba(88, 166, 255, 0.2));
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #79c0ff;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.35), rgba(88, 166, 255, 0.3));
+            border-color: rgba(100, 200, 255, 0.5);
+            box-shadow: 0 0 16px rgba(100, 200, 255, 0.2);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn.speech-only-disabled {
+            opacity: 0.35;
+            filter: saturate(0.4);
+            pointer-events: none;
+        }
+
+        /* ==================== Right Panel - AI Core ==================== */
+        .right-panel {
+            width: 280px;
+            background: rgba(22, 27, 34, 0.5);
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(100, 200, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            gap: 24px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .ai-core-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .ai-core-visual {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .core-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.15) 0%, transparent 70%);
+            animation: core-breathe 3.5s ease-in-out infinite;
+        }
+
+        @keyframes core-breathe {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.4;
+            }
+            50% {
+                transform: scale(1.15);
+                opacity: 0.7;
+            }
+        }
+
+        .core-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid transparent;
+        }
+
+        .core-ring:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            border-color: rgba(100, 200, 255, 0.25);
+            animation: core-rotate 12s linear infinite;
+        }
+
+        .core-ring:nth-child(3) {
+            width: 90px;
+            height: 90px;
+            border-color: rgba(100, 200, 255, 0.2);
+            animation: core-rotate-reverse 8s linear infinite;
+        }
+
+        @keyframes core-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes core-rotate-reverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        .core-center {
+            position: relative;
+            z-index: 5;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.2), rgba(88, 166, 255, 0.15));
+            border: 1px solid rgba(100, 200, 255, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 16px rgba(100, 200, 255, 0.12), 0 0 24px rgba(100, 200, 255, 0.15);
+        }
+
+        .core-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .core-stats {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: rgba(100, 200, 255, 0.05);
+            border: 1px solid rgba(100, 200, 255, 0.1);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .stat-name {
+            color: #6e7681;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            color: #79c0ff;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-bar {
+            width: 60px;
+            height: 3px;
+            background: rgba(100, 200, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(100, 200, 255, 0.4), rgba(100, 200, 255, 0.2));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* ==================== Responsive Design ==================== */
+        @media (max-width: 1200px) {
+            .right-panel {
+                width: 240px;
+                padding: 24px 20px;
+            }
+
+            .center-panel {
+                flex: 1.2;
+            }
+
+            .message {
+                max-width: 75%;
+            }
+
+            .message.user {
+                max-width: 75%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 56px;
+                flex-direction: row;
+                padding: 0 16px;
+                gap: 8px;
+                border-right: none;
+                border-bottom: 1px solid rgba(100, 200, 255, 0.08);
+            }
+
+            .nav-group {
+                flex-direction: row;
+                gap: 6px;
+                flex: 1;
+            }
+
+            .sidebar-logo {
+                margin-bottom: 0;
+            }
+
+            .sidebar-divider {
+                display: none;
+            }
+
+            .content-area {
+                flex-direction: column;
+            }
+
+            .center-panel {
+                border-right: none;
+                border-bottom: 1px solid rgba(100, 200, 255, 0.08);
+            }
+
+            .right-panel {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid rgba(100, 200, 255, 0.08);
+                height: 200px;
+                flex-direction: row;
+                gap: 16px;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            .ai-core-visual {
+                width: 100px;
+                height: 100px;
+                flex-shrink: 0;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .message.user {
+                max-width: 85%;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                height: auto;
+                padding: 12px 16px;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                gap: 4px;
+                padding: 0 12px;
+            }
+
+            .nav-item {
+                width: 40px;
+                height: 40px;
+            }
+
+            .sidebar-logo {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            .conversation-area {
+                padding: 16px;
+            }
+
+            .input-zone {
+                padding: 16px;
+                gap: 8px;
+            }
+
+            .voice-input-btn,
+            .send-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .right-panel {
+                padding: 16px;
+                height: 160px;
+            }
+
+            .ai-core-visual {
+                width: 80px;
+                height: 80px;
+            }
+
+            .message {
+                max-width: 100%;
+            }
+
+            .message.user {
+                max-width: 100%;
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body>
+  <div class="background-container">
+   <div class="grid-bg"></div>
+  </div>
+  <div class="app-container"><!-- Sidebar Navigation -->
+   <aside class="sidebar">
+    <div class="sidebar-logo" title="JARVIS Dashboard">
+     J
+    </div>
+    <div class="sidebar-divider"></div>
+    <nav class="nav-group">
+     <div class="nav-item active" data-nav="overview" title="Overview" onclick="navigateTo(this, 'overview')">
+      ◊
+     </div>
+     <div class="nav-item" data-nav="assistant" title="Assistant" onclick="navigateTo(this, 'assistant')">
+      ◆
+     </div>
+     <div class="nav-item" data-nav="voice" title="Voice" onclick="navigateTo(this, 'voice')">
+      ❙
+     </div>
+     <div class="nav-item" data-nav="memory" title="Memory" onclick="navigateTo(this, 'memory')">
+      ≡
+     </div>
+     <div class="nav-item" data-nav="system" title="System" onclick="navigateTo(this, 'system')">
+      ⚙
+     </div>
+     <div class="nav-item" data-nav="settings" title="Settings" onclick="navigateTo(this, 'settings')">
+      ⚡
+     </div>
+    </nav>
+   </aside><!-- Main Workspace -->
+   <div class="main-workspace"><!-- Header -->
+    <header class="header">
+     <div class="header-left">
+      <div class="header-title">
+       JARVIS Control Center
+      </div>
+      <div class="header-subtitle">
+       Enterprise AI Assistant Platform v2.4
+      </div>
+     </div>
+     <div class="header-right">
+      <div class="status-indicator">
+       <div class="status-dot" id="statusDot"></div><span id="statusText">Active</span>
+      </div>
+      <div class="mode-controls"><button class="mode-btn active" id="voiceToggle" onclick="toggleVoiceMode()">Voice</button> <button class="mode-btn" id="sleepToggle" onclick="toggleSleepMode()">Sleep</button>
+      </div>
+     </div>
+    </header><!-- Content Area -->
+    <div class="content-area"><!-- Center Panel -->
+     <div class="center-panel"><!-- Waveform Zone -->
+      <div class="waveform-zone">
+       <div class="waveform-container" id="waveformContainer">
+        <div class="waveform-ring"></div>
+        <div class="waveform-ring"></div>
+        <div class="waveform-ring"></div>
+        <div class="waveform-center">
+         ◆
+        </div>
+       </div>
+       <div class="waveform-label" id="waveformLabel">
+        Standby
+       </div>
+      </div><!-- Conversation Area -->
+      <div class="conversation-area" id="conversationArea"></div><!-- Input Zone -->
+      <div class="input-zone"><button class="voice-input-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="Voice Input">🎙</button> <input type="text" class="text-input" id="messageInput" placeholder="Enter command or query..." onkeypress="handleKeypress(event)"> <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">→</button>
+      </div>
+     </div><!-- Right Panel - AI Core -->
+     <div class="right-panel">
+      <div class="ai-core-section">
+       <div class="ai-core-visual">
+        <div class="core-glow"></div>
+        <div class="core-ring"></div>
+        <div class="core-ring"></div>
+        <div class="core-center"></div>
+       </div>
+       <div class="core-label">
+        Processing Core
+       </div>
+      </div>
+      <div class="core-stats">
+       <div class="stat-row"><span class="stat-name">Compute</span> <span class="stat-value" id="computeStat">0%</span>
+       </div>
+       <div class="stat-bar">
+        <div class="stat-bar-fill" id="computeBar" style="width: 0%"></div>
+       </div>
+       <div class="stat-row"><span class="stat-name">Memory</span> <span class="stat-value" id="memoryStat">0%</span>
+       </div>
+       <div class="stat-bar">
+        <div class="stat-bar-fill" id="memoryBar" style="width: 0%"></div>
+       </div>
+       <div class="stat-row"><span class="stat-name">Latency</span> <span class="stat-value" id="latencyStat">0ms</span>
+       </div>
+       <div class="stat-row"><span class="stat-name">Cmd Today</span> <span class="stat-value" id="commandsTodayStat">0</span>
+       </div>
+       <div class="stat-row"><span class="stat-name">Cmd Total</span> <span class="stat-value" id="commandsTotalStat">0</span>
+       </div>
+       <div class="stat-row"><span class="stat-name">Top Intent</span> <span class="stat-value" id="topIntentStat">-</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+        let isVoiceActive = false;
+        let isSleeping = false;
+        let requestInFlight = false;
+        let historyHydrated = false;
+        let pollingHandle = null;
+        let recognition = null;
+        let recognitionSupported = false;
+        let recognitionStarting = false;
+        let lastRecognitionError = '';
+        let speechSynthesisEnabled = true;
+        let replySpeaking = false;
+        let replyResumeFallbackTimer = null;
+        let listenPromptSpeaking = false;
+        let pendingResumeAfterResponse = false;
+        let resumeTimer = null;
+        let lastListeningPromptAt = 0;
+        let lastNoSpeechReminderAt = 0;
+        const NO_SPEECH_REMINDER_COOLDOWN_MS = 12000;
+        const useBackendVoiceReply = true;
+        let useBackendSpeechCapture = true;
+        let backendListenInFlight = false;
+        let backendCaptureFallbackNotified = false;
+        const showSystemMessages = false;
+        const speechOnlyMode = true;
+        let micPermissionNotified = false;
+
+        async function apiRequest(path, options = {}) {
+            const response = await fetch(path, {
+                method: options.method || 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: options.body ? JSON.stringify(options.body) : undefined
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status}`);
+            }
+            return response.json();
+        }
+
+        function setStatusVisual(kind, label) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const waveformLabel = document.getElementById('waveformLabel');
+            const waveformContainer = document.getElementById('waveformContainer');
+
+            if (kind === 'sleeping') {
+                statusDot.className = 'status-dot idle';
+                statusText.textContent = 'Not Active';
+                waveformLabel.textContent = 'Not Active';
+                waveformContainer.classList.add('waveform-hidden');
+                return;
+            }
+
+            if (kind === 'listening') {
+                statusDot.className = 'status-dot listening';
+                statusText.textContent = 'Listening';
+                waveformLabel.textContent = 'Listening';
+                waveformContainer.classList.remove('waveform-hidden');
+                return;
+            }
+
+            if (kind === 'processing') {
+                statusDot.className = 'status-dot responding';
+                statusText.textContent = 'Processing';
+                waveformLabel.textContent = label || 'Processing';
+                waveformContainer.classList.remove('waveform-hidden');
+                return;
+            }
+
+            statusDot.className = 'status-dot';
+            statusText.textContent = label || 'Active';
+            waveformLabel.textContent = 'Standby';
+            waveformContainer.classList.remove('waveform-hidden');
+        }
+
+        function enforceSpeechOnlyUi() {
+            if (!speechOnlyMode) return;
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+
+            if (messageInput) {
+                messageInput.value = '';
+                messageInput.disabled = true;
+                messageInput.readOnly = true;
+                messageInput.placeholder = 'Speech-only mode active. Tap the mic and speak.';
+                messageInput.classList.add('speech-only-disabled');
+            }
+
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.classList.add('speech-only-disabled');
+                sendBtn.title = 'Disabled in speech-only mode';
+            }
+        }
+
+        function setVoiceInputState(active) {
+            const voiceBtn = document.getElementById('voiceBtn');
+            isVoiceActive = active;
+            if (active) {
+                voiceBtn.classList.add('active');
+                if (!isSleeping) {
+                    setStatusVisual('listening');
+                }
+            } else {
+                voiceBtn.classList.remove('active');
+                if (!isSleeping && !requestInFlight) {
+                    setStatusVisual('online', 'Active');
+                }
+            }
+        }
+
+        function clearResumeTimer() {
+            if (resumeTimer) {
+                clearTimeout(resumeTimer);
+                resumeTimer = null;
+            }
+        }
+
+        function clearReplyResumeFallbackTimer() {
+            if (replyResumeFallbackTimer) {
+                clearTimeout(replyResumeFallbackTimer);
+                replyResumeFallbackTimer = null;
+            }
+        }
+
+        async function startBackendListening() {
+            if (!useBackendSpeechCapture || isSleeping || !isVoiceActive || backendListenInFlight) return;
+
+            backendListenInFlight = true;
+            requestInFlight = true;
+            setStatusVisual('listening');
+            try {
+                const payload = await apiRequest('/api/listen-command', { method: 'POST' });
+                applyServerState(payload);
+
+                const heard = String(payload.heard || '').trim();
+                if (heard) {
+                    addMessage('user', heard);
+                }
+
+                const reply = String(payload.reply || '').trim();
+                if (reply) {
+                    addMessage('assistant', reply);
+                }
+
+                requestInFlight = false;
+                if (speechOnlyMode && isVoiceActive && !isSleeping) {
+                    if (reply) {
+                        resumeListening({ announce: true, reason: 'after-reply', delayMs: 200 });
+                    } else if (!heard) {
+                        resumeListening({ announce: true, reason: 'no-speech', delayMs: 300 });
+                    } else {
+                        resumeListening({ announce: false, reason: 'post-heard', delayMs: 150 });
+                    }
+                }
+            } catch (error) {
+                requestInFlight = false;
+                const msg = String(error || '').toLowerCase();
+                if (msg.includes('404')) {
+                    useBackendSpeechCapture = false;
+                    if (!backendCaptureFallbackNotified) {
+                        backendCaptureFallbackNotified = true;
+                        if (recognitionSupported) {
+                            addMessage('assistant', 'Backend listen endpoint not available. Switching to browser voice capture.');
+                        } else {
+                            addMessage('assistant', 'Backend listen endpoint is missing and browser speech capture is unavailable. Restart server with latest code.');
+                        }
+                    }
+                    if (speechOnlyMode && isVoiceActive && !isSleeping && recognitionSupported) {
+                        resumeListening({ announce: false, reason: 'fallback-browser-capture', delayMs: 100 });
+                    }
+                    return;
+                }
+                if (speechOnlyMode && isVoiceActive && !isSleeping) {
+                    resumeListening({ announce: false, reason: 'backend-listen-error', delayMs: 1200 });
+                }
+            } finally {
+                backendListenInFlight = false;
+                requestInFlight = false;
+            }
+        }
+
+        function resumeListening({ announce = false, reason = 'unspecified', delayMs = 0 } = {}) {
+            if (!speechOnlyMode || isSleeping || !isVoiceActive) return;
+            if (!useBackendSpeechCapture && !recognitionSupported) return;
+
+            const attemptResume = () => {
+                resumeTimer = null;
+                if (!speechOnlyMode || isSleeping || !isVoiceActive) return;
+                if (!useBackendSpeechCapture && !recognitionSupported) return;
+
+                if (requestInFlight || replySpeaking || listenPromptSpeaking) {
+                    pendingResumeAfterResponse = true;
+                    return;
+                }
+
+                let shouldAnnounce = !!announce;
+                const now = Date.now();
+                if (reason === 'no-speech' && shouldAnnounce) {
+                    if (now - lastNoSpeechReminderAt < NO_SPEECH_REMINDER_COOLDOWN_MS) {
+                        shouldAnnounce = false;
+                    } else {
+                        lastNoSpeechReminderAt = now;
+                    }
+                }
+                const isAfterReplyReason = reason === 'after-reply' || reason === 'after-reply-pending';
+                if (shouldAnnounce && !isAfterReplyReason && now - lastListeningPromptAt < 750) {
+                    shouldAnnounce = false;
+                }
+
+                if (!shouldAnnounce) {
+                    pendingResumeAfterResponse = false;
+                    if (useBackendSpeechCapture) {
+                        startBackendListening();
+                    } else {
+                        startRecognition();
+                    }
+                    return;
+                }
+
+                if (shouldAnnounce && useBackendVoiceReply) {
+                    lastListeningPromptAt = now;
+                    pendingResumeAfterResponse = false;
+                    const speakViaBackend = async () => {
+                        try {
+                            await apiRequest('/api/speak', {
+                                method: 'POST',
+                                body: { text: 'Listening.' }
+                            });
+                        } catch (error) {
+                            // no-op
+                        }
+                        if (useBackendSpeechCapture) {
+                            startBackendListening();
+                        } else {
+                            startRecognition();
+                        }
+                    };
+                    speakViaBackend();
+                    return;
+                }
+
+                if (!speechSynthesisEnabled || !('speechSynthesis' in window)) {
+                    pendingResumeAfterResponse = false;
+                    if (useBackendSpeechCapture) {
+                        startBackendListening();
+                    } else {
+                        startRecognition();
+                    }
+                    return;
+                }
+
+                lastListeningPromptAt = now;
+                listenPromptSpeaking = true;
+                const prompt = new SpeechSynthesisUtterance('Listening.');
+                prompt.rate = 1.0;
+                prompt.pitch = 1.0;
+                prompt.lang = 'en-IN';
+                prompt.onend = () => {
+                    listenPromptSpeaking = false;
+                    pendingResumeAfterResponse = false;
+                    if (useBackendSpeechCapture) {
+                        startBackendListening();
+                    } else {
+                        startRecognition();
+                    }
+                };
+                prompt.onerror = () => {
+                    listenPromptSpeaking = false;
+                    pendingResumeAfterResponse = false;
+                    if (useBackendSpeechCapture) {
+                        startBackendListening();
+                    } else {
+                        startRecognition();
+                    }
+                };
+                try {
+                    window.speechSynthesis.resume();
+                } catch (error) {
+                    // no-op
+                }
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(prompt);
+            };
+
+            clearResumeTimer();
+            if (delayMs > 0) {
+                resumeTimer = setTimeout(attemptResume, delayMs);
+            } else {
+                attemptResume();
+            }
+        }
+
+        function stopRecognition() {
+            clearResumeTimer();
+            if (!recognition) return;
+            recognitionStarting = false;
+            try {
+                recognition.stop();
+            } catch (error) {
+                // no-op
+            }
+        }
+
+        function startRecognition() {
+            if (useBackendSpeechCapture) {
+                startBackendListening();
+                return;
+            }
+            if (!recognition || isSleeping || recognitionStarting || replySpeaking || listenPromptSpeaking) return;
+            if (requestInFlight) {
+                pendingResumeAfterResponse = true;
+                return;
+            }
+            recognitionStarting = true;
+            try {
+                recognition.start();
+            } catch (error) {
+                recognitionStarting = false;
+                const msg = String(error).toLowerCase();
+                if (msg.includes('already started')) {
+                    return;
+                }
+                const micBlocked =
+                    msg.includes('notallowed') || msg.includes('not-allowed') || msg.includes('permission');
+                if (micBlocked) {
+                    setVoiceInputState(false);
+                    if (!micPermissionNotified) {
+                        micPermissionNotified = true;
+                        addMessage('assistant', 'Microphone permission is blocked. Allow mic access to use speech-only mode.');
+                    }
+                    return;
+                }
+                if (speechOnlyMode && !isSleeping) {
+                    setVoiceInputState(true);
+                    resumeListening({ announce: false, reason: 'start-error', delayMs: 1200 });
+                    return;
+                }
+                addSystemMessage('Unable to start voice input.');
+                setVoiceInputState(false);
+            }
+        }
+
+        function setupSpeechRecognition() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) {
+                recognitionSupported = false;
+                if (speechOnlyMode && !useBackendSpeechCapture) {
+                    addMessage('assistant', 'Speech recognition is not supported in this browser. Use Chrome or Edge and allow microphone access.');
+                }
+                return;
+            }
+
+            recognitionSupported = true;
+            recognition = new SR();
+            recognition.lang = 'en-IN';
+            recognition.interimResults = false;
+            recognition.continuous = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onresult = (event) => {
+                lastRecognitionError = '';
+                const transcript = (event.results?.[0]?.[0]?.transcript || '').trim();
+                if (!transcript) return;
+                addMessage('user', transcript);
+                sendMessageText(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                recognitionStarting = false;
+                const err = String(event.error || '').toLowerCase();
+                lastRecognitionError = err;
+                const blocked = err === 'not-allowed' || err === 'service-not-allowed' || err === 'audio-capture';
+                if (blocked) {
+                    setVoiceInputState(false);
+                    clearResumeTimer();
+                    pendingResumeAfterResponse = false;
+                    if (!micPermissionNotified) {
+                        micPermissionNotified = true;
+                        addMessage('assistant', 'Microphone access is blocked. Please allow microphone permission and refresh.');
+                    }
+                    return;
+                }
+                if (err === 'no-speech') {
+                    resumeListening({ announce: true, reason: 'no-speech', delayMs: 300 });
+                    return;
+                }
+                if (speechOnlyMode && !isSleeping) {
+                    resumeListening({ announce: false, reason: 'recoverable-error', delayMs: 800 });
+                    return;
+                }
+                setVoiceInputState(false);
+            };
+
+            recognition.onend = () => {
+                recognitionStarting = false;
+                const endReason = lastRecognitionError;
+                lastRecognitionError = '';
+                if (endReason === 'no-speech') {
+                    return;
+                }
+                if (isVoiceActive && !isSleeping) {
+                    resumeListening({ announce: false, reason: 'onend', delayMs: 150 });
+                }
+            };
+        }
+
+        function speakAssistantReply(text) {
+            if (!text || isSleeping) return;
+            if (!speechSynthesisEnabled || !('speechSynthesis' in window)) {
+                if (speechOnlyMode && isVoiceActive && !isSleeping) {
+                    resumeListening({ announce: true, reason: 'after-reply', delayMs: 200 });
+                }
+                return;
+            }
+
+            replySpeaking = true;
+            stopRecognition();
+            clearReplyResumeFallbackTimer();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            utterance.lang = 'en-IN';
+            utterance.onend = () => {
+                clearReplyResumeFallbackTimer();
+                replySpeaking = false;
+                if (speechOnlyMode && isVoiceActive && !isSleeping) {
+                    resumeListening({ announce: true, reason: 'after-reply', delayMs: 200 });
+                }
+            };
+            utterance.onerror = () => {
+                clearReplyResumeFallbackTimer();
+                replySpeaking = false;
+                if (speechOnlyMode && isVoiceActive && !isSleeping) {
+                    resumeListening({ announce: true, reason: 'after-reply', delayMs: 200 });
+                }
+            };
+            try {
+                window.speechSynthesis.resume();
+            } catch (error) {
+                // no-op
+            }
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+
+            const estimatedMs = Math.min(12000, Math.max(1800, text.length * 55));
+            replyResumeFallbackTimer = setTimeout(() => {
+                if (!replySpeaking) return;
+                replySpeaking = false;
+                resumeListening({ announce: true, reason: 'after-reply-pending', delayMs: 100 });
+            }, estimatedMs);
+        }
+
+        function applyServerState(payload) {
+            if (!payload) return;
+
+            isSleeping = !!payload.sleeping;
+            const sleepToggle = document.getElementById('sleepToggle');
+            const voiceToggle = document.getElementById('voiceToggle');
+            const messageInput = document.getElementById('messageInput');
+            const voiceBtn = document.getElementById('voiceBtn');
+
+            if (isSleeping) {
+                sleepToggle.classList.add('active');
+                voiceToggle.classList.remove('active');
+                messageInput.disabled = true;
+                voiceBtn.style.opacity = '0.4';
+                speechSynthesisEnabled = false;
+                pendingResumeAfterResponse = false;
+                setVoiceInputState(false);
+                stopRecognition();
+                setStatusVisual('sleeping');
+            } else {
+                sleepToggle.classList.remove('active');
+                voiceToggle.classList.add('active');
+                messageInput.disabled = false;
+                voiceBtn.style.opacity = '1';
+                speechSynthesisEnabled = true;
+                if (isVoiceActive) {
+                    setStatusVisual('listening');
+                } else {
+                    setStatusVisual('online', 'Active');
+                }
+            }
+
+            if (payload.stats) {
+                updateStats(payload.stats);
+            }
+            if (payload.analytics) {
+                updateAnalytics(payload.analytics);
+            }
+            enforceSpeechOnlyUi();
+        }
+
+        function hydrateHistory(history) {
+            if (!Array.isArray(history)) return;
+            const conversation = document.getElementById('conversationArea');
+            conversation.innerHTML = '';
+
+            if (!history.length) {
+                return;
+            }
+
+            history.forEach(item => {
+                const role = item.role === 'user' ? 'user' : 'assistant';
+                addMessage(role, item.text || '');
+            });
+        }
+
+        function navigateTo(element, section) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            addSystemMessage(`Navigated to ${section.toUpperCase()} module.`);
+        }
+
+        async function toggleVoiceMode() {
+            const voiceToggle = document.getElementById('voiceToggle');
+            const sleepToggle = document.getElementById('sleepToggle');
+
+            if (!voiceToggle.classList.contains('active')) {
+                voiceToggle.classList.add('active');
+                sleepToggle.classList.remove('active');
+                try {
+                    const payload = await apiRequest('/api/wake', { method: 'POST' });
+                    applyServerState(payload);
+                    speechSynthesisEnabled = true;
+                    if (speechOnlyMode && recognitionSupported && !isSleeping) {
+                        setVoiceInputState(true);
+                        resumeListening({ announce: false, reason: 'wake', delayMs: 120 });
+                    }
+                    addSystemMessage('Voice mode enabled.');
+                } catch (error) {
+                    addSystemMessage('Failed to wake assistant.');
+                }
+            }
+        }
+
+        async function toggleSleepMode() {
+            const sleepToggle = document.getElementById('sleepToggle');
+            const voiceToggle = document.getElementById('voiceToggle');
+
+            if (!sleepToggle.classList.contains('active')) {
+                sleepToggle.classList.add('active');
+                voiceToggle.classList.remove('active');
+                setVoiceInputState(false);
+                stopRecognition();
+                speechSynthesisEnabled = false;
+                try {
+                    const payload = await apiRequest('/api/sleep', { method: 'POST' });
+                    applyServerState(payload);
+                    addSystemMessage('Sleep mode activated. System in standby.');
+                } catch (error) {
+                    addSystemMessage('Failed to activate sleep mode.');
+                }
+            }
+        }
+
+        function toggleVoiceInput() {
+            if (isSleeping) return;
+            if (!useBackendSpeechCapture && !recognitionSupported) {
+                addSystemMessage('Voice input is not supported in this browser.');
+                return;
+            }
+            if (speechOnlyMode) {
+                if (!isVoiceActive) {
+                    setVoiceInputState(true);
+                }
+                resumeListening({ announce: false, reason: 'manual-voice-start', delayMs: 0 });
+                return;
+            }
+
+            if (isVoiceActive) {
+                setVoiceInputState(false);
+                stopRecognition();
+            } else {
+                setVoiceInputState(true);
+                startRecognition();
+            }
+        }
+
+        async function sendMessageText(message) {
+            if (isSleeping || requestInFlight) return;
+            if (!message || !message.trim()) return;
+
+            requestInFlight = true;
+            pendingResumeAfterResponse = false;
+            setStatusVisual('processing');
+            let assistantReplyText = '';
+
+            try {
+                const payload = await apiRequest('/api/command', {
+                    method: 'POST',
+                    body: { message: message }
+                });
+                assistantReplyText = String(payload.reply || '').trim();
+                if (assistantReplyText) {
+                    addMessage('assistant', assistantReplyText);
+                    if (!useBackendVoiceReply) {
+                        speakAssistantReply(assistantReplyText);
+                    }
+                }
+                applyServerState(payload);
+            } catch (error) {
+                addSystemMessage('Unable to reach backend API.');
+                if (!isSleeping) {
+                    setStatusVisual('online', 'Active');
+                }
+            } finally {
+                requestInFlight = false;
+                if (speechOnlyMode && isVoiceActive && !isSleeping) {
+                    const hadPendingResume = pendingResumeAfterResponse;
+                    if (assistantReplyText) {
+                        if (replySpeaking) {
+                            pendingResumeAfterResponse = true;
+                        } else {
+                            const reason = hadPendingResume ? 'after-reply-pending' : 'after-reply';
+                            resumeListening({ announce: true, reason: reason, delayMs: 200 });
+                        }
+                    } else {
+                        const reason = hadPendingResume ? 'after-response-pending' : 'after-response-no-reply';
+                        resumeListening({ announce: true, reason: reason, delayMs: 200 });
+                    }
+                }
+                if (isVoiceActive && !isSleeping && !replySpeaking) {
+                    setStatusVisual('listening');
+                }
+            }
+        }
+
+        async function sendMessage() {
+            if (speechOnlyMode) return;
+            if (isSleeping) return;
+
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('user', message);
+            input.value = '';
+            await sendMessageText(message);
+        }
+
+        function handleKeypress(event) {
+            if (speechOnlyMode) {
+                event.preventDefault();
+                return;
+            }
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function addMessage(sender, text) {
+            const conversation = document.getElementById('conversationArea');
+            const group = document.createElement('div');
+            group.className = 'message-group';
+
+            if (sender === 'user') {
+                group.innerHTML = `
+                    <div class="message user">
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: 1;">
+                            <div class="message-label">You</div>
+                            <div class="message-bubble">${escapeHtml(text)}</div>
+                        </div>
+                        <div class="message-avatar" style="background: rgba(79, 161, 246, 0.15); border-color: rgba(79, 161, 246, 0.3);">U</div>
+                    </div>
+                `;
+            } else {
+                group.innerHTML = `
+                    <div class="message">
+                        <div class="message-avatar">J</div>
+                        <div class="message-content">
+                            <div class="message-label">JARVIS Assistant</div>
+                            <div class="message-bubble">${escapeHtml(text)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            conversation.appendChild(group);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            if (!showSystemMessages) return;
+            const conversation = document.getElementById('conversationArea');
+            const group = document.createElement('div');
+            group.className = 'message-group';
+            group.innerHTML = `
+                <div class="message" style="opacity: 0.6;">
+                    <div class="message-content">
+                        <div class="message-label">System</div>
+                        <div class="message-bubble" style="font-size: 12px; font-style: italic; color: #8b949e;">${escapeHtml(text)}</div>
+                    </div>
+                </div>
+            `;
+            conversation.appendChild(group);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function updateStats(stats) {
+            if (!stats) return;
+            const compute = Number(stats.compute || 0);
+            const memory = Number(stats.memory || 0);
+            const latency = Number(stats.latency_ms || 0);
+            document.getElementById('computeStat').textContent = compute + '%';
+            document.getElementById('computeBar').style.width = compute + '%';
+            document.getElementById('memoryStat').textContent = memory + '%';
+            document.getElementById('memoryBar').style.width = memory + '%';
+            document.getElementById('latencyStat').textContent = latency + 'ms';
+        }
+
+        function updateAnalytics(analytics) {
+            if (!analytics) return;
+            const today = Number(analytics.commands_today || 0);
+            const total = Number(analytics.total_commands || 0);
+            const intents = Array.isArray(analytics.top_intents) ? analytics.top_intents : [];
+            const top = intents.length ? `${intents[0].name} (${intents[0].count})` : '-';
+            const todayEl = document.getElementById('commandsTodayStat');
+            const totalEl = document.getElementById('commandsTotalStat');
+            const topEl = document.getElementById('topIntentStat');
+            if (todayEl) todayEl.textContent = String(today);
+            if (totalEl) totalEl.textContent = String(total);
+            if (topEl) topEl.textContent = top;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+
+        async function syncState() {
+            try {
+                const payload = await apiRequest('/api/state');
+                applyServerState(payload);
+                if (!historyHydrated) {
+                    hydrateHistory(payload.history || []);
+                    historyHydrated = true;
+                }
+            } catch (error) {
+                addSystemMessage('Backend state sync failed.');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            setupSpeechRecognition();
+            enforceSpeechOnlyUi();
+            const conversation = document.getElementById('conversationArea');
+            if (conversation) {
+                conversation.innerHTML = '';
+            }
+            historyHydrated = false;
+            try {
+                const payload = await apiRequest('/api/reset-chat', { method: 'POST' });
+                applyServerState(payload);
+            } catch (error) {
+                // no-op
+            }
+            await syncState();
+            if (speechOnlyMode) {
+                try {
+                    const payload = await apiRequest('/api/wake', { method: 'POST' });
+                    applyServerState(payload);
+                } catch (error) {
+                    // no-op
+                }
+            }
+            if (speechOnlyMode && recognitionSupported && !isSleeping) {
+                setVoiceInputState(true);
+                resumeListening({ announce: false, reason: 'startup', delayMs: 120 });
+            }
+            if (pollingHandle) {
+                clearInterval(pollingHandle);
+            }
+            pollingHandle = setInterval(syncState, 5000);
+        });
+    </script>
+ </body>
+</html>
